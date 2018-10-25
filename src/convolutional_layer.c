@@ -49,6 +49,66 @@ matrix im2col(image im, int size, int stride)
     matrix col = make_matrix(rows, cols);
 
     // TODO: 5.1 - fill in the column matrix
+    int out_row;
+    int out_col;
+    int channel;
+
+    for(channel = 0; channel < im.c; channel++) {
+        float* channel_im = get_channel(im, channel);
+
+        // go through all the rows
+        for(out_row = 0; out_row < rows; out_row++) {
+
+            // go through a single row
+            for(out_col = 0; out_col < cols; out_col++) {
+
+                // int in_col_index = (out_col % im.cols) - 1;
+                // if (in_col_index == -1 || in_col_index == im.cols) {
+                //     // padding
+                // }
+
+                int in_col_index = out_col % im.cols;
+                int in_row_index = out_row % im.rows;
+
+                // middle piece
+
+
+                col[out_col + cols * out_row] = ...
+
+            }
+        }
+    }
+
+        // go through all the rows
+        for(out_row = 0; out_row < rows; out_row++) {
+
+            // go through a single row
+            for(out_col = 0; out_col < im.cols; out_col++) {
+                col[out_col + cols * out_row] = 0
+
+            }
+
+            col[im.cols + cols * out_row] = 0;
+            for(out_col = im.cols + 1; out < im.cols * 2; out_col++) {
+                in_column_val = (out_col - 1) % im.cols;
+            }
+        }
+    }
+
+
+
+    //     // go through all the rows
+    // for(i = 0; i < im.rows; i++) {
+
+    //     // go through a single row
+    //     for(j = 0; j < im.cols; j++) {
+    //         // padding?
+
+            
+    //         // middle piece
+
+    //     }
+    // }
 
     return col;
 }
