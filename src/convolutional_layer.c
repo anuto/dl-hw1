@@ -54,46 +54,35 @@ matrix im2col(image im, int size, int stride)
     int channel;
 
     for(channel = 0; channel < im.c; channel++) {
-        float* channel_im = get_channel(im, channel);
+        image channel_im = get_channel(im, channel);
 
         // go through all the rows
-        for(out_row = 0; out_row < rows; out_row++) {
+        for(cur_row = 0; cur_row < size * size; cur_row++) {
 
             // go through a single row
-            for(out_col = 0; out_col < cols; out_col++) {
+            for(cur_col = 0; cur_col < cols; cur_col++) {
+                // cur_row represents index in the size x size kernel
+                // cur_col represents the filter #, starting at 0
+                // cur_col can be used to calculate the top left corner of the kernel
+                // cur_row can be used to calculate the index from top left corner of kernel
+                int im_col = cur_col % im.col - 1;
+                int im_row = cur_col / im.col - 1;
 
-                // int in_col_index = (out_col % im.cols) - 1;
-                // if (in_col_index == -1 || in_col_index == im.cols) {
-                //     // padding
-                // }
+                im_col += cur_row / size;
+                im_row += cur_row % size;
 
-                int in_col_index = out_col % im.cols;
-                int in_row_index = out_row % im.rows;
-
-                // middle piece
-
-
-                col[out_col + cols * out_row] = ...
-
+                if (im_col == -1 || im_row == -1 || im_col == size || im_row == size) {
+                    col[cur_row * cols + cur_col + (size * size * channel * cols)] 
+                        = 0;        
+                } else {
+                    col[cur_row * cols + cur_col + (size * size * channel * cols)] 
+                        = channel_im.data[im_row * im.cols + im_row];
+                }
             }
         }
     }
 
-        // go through all the rows
-        for(out_row = 0; out_row < rows; out_row++) {
 
-            // go through a single row
-            for(out_col = 0; out_col < im.cols; out_col++) {
-                col[out_col + cols * out_row] = 0
-
-            }
-
-            col[im.cols + cols * out_row] = 0;
-            for(out_col = im.cols + 1; out < im.cols * 2; out_col++) {
-                in_column_val = (out_col - 1) % im.cols;
-            }
-        }
-    }
 
 
 
@@ -112,6 +101,8 @@ matrix im2col(image im, int size, int stride)
 
     return col;
 }
+
+
 
 // The reverse of im2col, add elements back into image
 // matrix col: column matrix to put back into image
