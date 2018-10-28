@@ -4,7 +4,25 @@
 #include <float.h>
 #include "uwnet.h"
 
+/*
+Maxpooling is another core building block of convolutional neural networks. 
+Implementing maxpooling will be similar to implementing convolutions in some 
+ways, you will have to iterate over the image, process a window of pixels with 
+me fixed size, and in this case find the maximum value to put into the output.
 
+6.1 forward_maxpool_layer
+Write the forward method to find the maximum value in a given window size,
+ moving by some strided amount between applications. Note: maxpooling happens
+  on each channel independently.
+
+6.2 backward_maxpool_layer
+The backward method will be similar to forward. Even though the window size
+ may be large, only one element contributed to the error in the prediction 
+ so we only backpropagate our deltas to a single element in the input per 
+ window. Thus, you'll iterate through again and find the maximum value and 
+ then backpropagate error to the appropriate element in prev_delta 
+ corresponding to the position of the maximum element.
+*/
 // Run a maxpool layer on input
 // layer l: pointer to layer to run
 // matrix in: input to layer

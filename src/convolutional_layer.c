@@ -49,8 +49,8 @@ matrix im2col(image im, int size, int stride)
     matrix col = make_matrix(rows, cols);
 
     // TODO: 5.1 - fill in the column matrix
-    int out_row;
-    int out_col;
+    int cur_row;
+    int cur_col;
     int channel;
 
     for(channel = 0; channel < im.c; channel++) {
@@ -65,40 +65,25 @@ matrix im2col(image im, int size, int stride)
                 // cur_col represents the filter #, starting at 0
                 // cur_col can be used to calculate the top left corner of the kernel
                 // cur_row can be used to calculate the index from top left corner of kernel
-                int im_col = cur_col % im.col - 1;
-                int im_row = cur_col / im.col - 1;
+                int im_col = cur_col % im.w - 1;
+                int im_row = cur_col / im.w - 1;
 
-                im_col += cur_row / size;
-                im_row += cur_row % size;
+                im_col += cur_row % size;
+                im_row += cur_row / size;
 
-                if (im_col == -1 || im_row == -1 || im_col == size || im_row == size) {
-                    col[cur_row * cols + cur_col + (size * size * channel * cols)] 
-                        = 0;        
+                int col_array_index = cur_row * cols + cur_col + (size * size * channel * cols);
+                if (cur_col == 2 && cur_row == 5) {
+                    printf("imcol: %d , imrow: %d \n", im_col, im_row);
+                }
+                if (im_col == -1 || im_row == -1 || im_col == im.w || im_row == im.h) {
+                    col.data[col_array_index] = 0;        
                 } else {
-                    col[cur_row * cols + cur_col + (size * size * channel * cols)] 
-                        = channel_im.data[im_row * im.cols + im_row];
+                    col.data[col_array_index] = channel_im.data[im_row * im.w + im_col];
+                    // = get_pixel(im, im_col, im_row, channel)
                 }
             }
         }
     }
-
-
-
-
-
-    //     // go through all the rows
-    // for(i = 0; i < im.rows; i++) {
-
-    //     // go through a single row
-    //     for(j = 0; j < im.cols; j++) {
-    //         // padding?
-
-            
-    //         // middle piece
-
-    //     }
-    // }
-
     return col;
 }
 
@@ -116,8 +101,40 @@ void col2im(matrix col, int size, int stride, image im)
     int rows = im.c*size*size;
     int cols = outw * outh;
 
-    // TODO: 5.2 - add values into image im from the column matrix
+    int cur_row;
+    int cur_col;
+    int channel;
 
+    // TODO: 5.2 - add values into image im from the column matrix
+    for(channel = 0; channel < im.c; channel++) {
+        image channel_im = get_channel(im, channel);
+
+        // go through all the rows
+        for(cur_row = 0; cur_row < size * size; cur_row++) {
+
+            // go through a single row
+            for(cur_col = 0; cur_col < cols; cur_col++) {
+                // cur_row represents index in the size x size kernel
+                // cur_col represents the filter #, starting at 0
+                // cur_col can be used to calculate the top left corner of the kernel
+                // cur_row can be used to calculate the index from top left corner of kernel
+                int im_col = cur_col % im.w - 1;
+                int im_row = cur_col / im.w - 1;
+
+                im_col += cur_row % size;
+                im_row += cur_row / size;
+
+                if (im_col == -1 || im_row == -1 || im_col == size || im_row == size) {
+                            
+                } else {
+                    // set_pixel(im, im_col, im_row, channel, get_pixel() + col[...]) 
+                    channel_im.data[im_row * im.w + im_col] 
+                        += col.data[cur_row * cols + cur_col + (size * size * channel * cols)];
+
+                }
+            }
+        }
+    }
 }
 
 // Run a convolutional layer on input
@@ -202,6 +219,12 @@ void backward_convolutional_layer(layer l, matrix prev_delta)
 void update_convolutional_layer(layer l, float rate, float momentum, float decay)
 {
     // TODO: 5.3 Update the weights, similar to the connected layer.
+    axpy_matrix(rate, l.db, l.b);
+    scal_matrix(momentum, l.db);
+
+    axpy_matrix(-decay, l.w, l.dw);
+    axpy_matrix(rate, l.dw, l.w);
+    scal_matrix(momentum, l.dw);
 }
 
 // Make a new convolutional layer
