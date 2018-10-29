@@ -95,14 +95,18 @@ void backward_maxpool_layer(layer l, matrix prev_delta)
     int max;
     int next;
     int max_index;
+    // printf("delta.rows: %d\n", delta.rows);
+    // printf("delta.columns: %d\n", delta.cols);
     for (rows = 0; rows < in.rows / l.stride; rows++) 
     {
         for (cols = 0; cols < in.cols / l.stride; cols++)
-        {   
+        { 
+            // printf("cur col: %d\n", cols);
             // index of the upper left corner of the pool
             int offset = (cols * l.stride) + (rows * l.stride * in.cols);
 
             max = in.data[offset];
+            max_index = offset;
             for (pool_row = 0; pool_row < l.size; pool_row++)
             {
                 for (pool_col = 0; pool_col < l.size; pool_col++)
