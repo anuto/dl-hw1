@@ -72,9 +72,6 @@ matrix im2col(image im, int size, int stride)
                 im_row += cur_row / size;
 
                 int col_array_index = cur_row * cols + cur_col + (size * size * channel * cols);
-                if (cur_col == 2 && cur_row == 5) {
-                    printf("imcol: %d , imrow: %d \n", im_col, im_row);
-                }
                 if (im_col == -1 || im_row == -1 || im_col == im.w || im_row == im.h) {
                     col.data[col_array_index] = 0;        
                 } else {
@@ -124,13 +121,10 @@ void col2im(matrix col, int size, int stride, image im)
                 im_col += cur_row % size;
                 im_row += cur_row / size;
 
-                if (im_col == -1 || im_row == -1 || im_col == size || im_row == size) {
-                            
-                } else {
+                int col_array_index = cur_row * cols + cur_col + (size * size * channel * cols);
+                if (im_col != -1 && im_row != -1 && im_col != im.w && im_row != im.h) {
                     // set_pixel(im, im_col, im_row, channel, get_pixel() + col[...]) 
-                    channel_im.data[im_row * im.w + im_col] 
-                        += col.data[cur_row * cols + cur_col + (size * size * channel * cols)];
-
+                    channel_im.data[im_row * im.w + im_col] += col.data[col_array_index];
                 }
             }
         }

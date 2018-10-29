@@ -35,6 +35,35 @@ matrix forward_maxpool_layer(layer l, matrix in)
 
     // TODO: 6.1 - iterate over the input and fill in the output with max values
 
+    int cols;
+    int rows;
+    int pool_col;
+    int pool_row;
+    int max;
+    int next;
+    for (rows = 0; rows < in.rows / l.stride; rows++) 
+    {
+        for (cols = 0; cols < in.cols / l.stride; cols++)
+        {   
+            // index of the upper left corner of the pool
+            int offset = (cols * l.stride) + (rows * l.stride * in.cols);
+
+            max = in.data[offset];
+            for (pool_row = 0; pool_row < l.size; pool_row++)
+            {
+                for (pool_col = 0; pool_col < l.size; pool_col++)
+                {
+                    next = in.data[offset + pool_col + pool_row * in.cols];
+                    if (next > max) 
+                    {
+                        max = next;
+                    }
+                }
+            }
+            // set max in out
+            out.data[cols + rows * out.cols] = max;
+        }
+    }
     l.in[0] = in;
     free_matrix(l.out[0]);
     l.out[0] = out;
@@ -58,6 +87,39 @@ void backward_maxpool_layer(layer l, matrix prev_delta)
     // TODO: 6.2 - find the max values in the input again and fill in the
     // corresponding delta with the delta from the output. This should be
     // similar to the forward method in structure.
+
+    int cols;
+    int rows;
+    int pool_col;
+    int pool_row;
+    int max;
+    int next;
+    int max_index;
+    for (rows = 0; rows < in.rows / l.stride; rows++) 
+    {
+        for (cols = 0; cols < in.cols / l.stride; cols++)
+        {   
+            // index of the upper left corner of the pool
+            int offset = (cols * l.stride) + (rows * l.stride * in.cols);
+
+            max = in.data[offset];
+            for (pool_row = 0; pool_row < l.size; pool_row++)
+            {
+                for (pool_col = 0; pool_col < l.size; pool_col++)
+                {
+                    next = in.data[offset + pool_col + pool_row * in.cols];
+                    if (next > max) 
+                    {
+                        max_index = offset + pool_col + pool_row * in.cols;
+                        max = next;
+                    }
+                }
+            }
+            // fill in corresponding delta w delta from output
+            prev_delta.data[max_index] = delta.data[cols + rows * delta.cols];
+            
+        }
+    }
 
 }
 
