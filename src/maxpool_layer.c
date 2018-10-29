@@ -88,6 +88,9 @@ void backward_maxpool_layer(layer l, matrix prev_delta)
     // corresponding delta with the delta from the output. This should be
     // similar to the forward method in structure.
 
+    printf("in %d, %d : delta %d, %d \n", in.rows / l.stride, in.cols / l.stride
+        , delta.rows, delta.cols);
+
     int cols;
     int rows;
     int pool_col;

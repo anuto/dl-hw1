@@ -123,8 +123,9 @@ void col2im(matrix col, int size, int stride, image im)
 
                 int col_array_index = cur_row * cols + cur_col + (size * size * channel * cols);
                 if (im_col != -1 && im_row != -1 && im_col != im.w && im_row != im.h) {
-                    // set_pixel(im, im_col, im_row, channel, get_pixel() + col[...]) 
-                    channel_im.data[im_row * im.w + im_col] += col.data[col_array_index];
+                    set_pixel(im, im_col, im_row, channel, get_pixel(im, im_col, im_row, channel) 
+                        + col.data[col_array_index]); 
+                    // channel_im.data[im_row * im.w + im_col] += col.data[col_array_index];
                 }
             }
         }
