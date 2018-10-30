@@ -51,22 +51,30 @@ matrix forward_maxpool_layer(layer l, matrix in)
     // find max values in some range, and put them into the output.
     int out_index = 0;
     int offset;
-    printf("size: %d", l.size);
+    // printf("size: %d", l.size);
+
+    // for each image (one row = one image)
     for (image = 0; image < in.rows; image++) 
     {
+        // for each channel in the image
         for (channel = 0; channel < l.channels; channel++) 
         {
+            // for each row in the image channel. We move 'stride' amount
             for (rows = 0; rows < outh; rows++)
             {
+                // for each column in the row of the image channel. We move 'stride' amount
                 for (cols = 0; cols < outw; cols++)
                 {
                     // calculate one value
 
                     offset = image * in.cols 
                         + channel * l.width * l.height
-                        + rows * l.width
+                        + rows * outw
                         + cols;
-                    printf("    offset: %d", offset);
+
+                    // printf("    offset: %d", offset);
+                    max = -100000;
+
                     for (pool_row = 0; pool_row < l.size; pool_row++)
                     {
                         for (pool_col = 0; pool_col < l.size; pool_col++)
@@ -84,9 +92,9 @@ matrix forward_maxpool_layer(layer l, matrix in)
             }
         }
     }
-    printf("out_index %d\n", out_index);
-    printf("dimension %d\n", out.rows * out.cols);
-    printf("\n");
+    // printf("out_index %d\n", out_index);
+    // printf("dimension %d\n", out.rows * out.cols);
+    // printf("\n");
 
     /*
     for (rows = 0; rows < out.rows; rows++) 
