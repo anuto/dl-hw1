@@ -69,8 +69,8 @@ matrix forward_maxpool_layer(layer l, matrix in)
 
                     offset = image * in.cols 
                         + channel * l.width * l.height
-                        + rows * outw
-                        + cols;
+                        + rows * l.width * l.stride
+                        + cols * l.stride;
 
                     // printf("    offset: %d", offset);
                     max = -100000;
@@ -96,35 +96,6 @@ matrix forward_maxpool_layer(layer l, matrix in)
     // printf("dimension %d\n", out.rows * out.cols);
     // printf("\n");
 
-    /*
-    for (rows = 0; rows < out.rows; rows++) 
-    {
-        for (cols = 0; cols < out.cols; cols++)
-        {   
-            // index of the upper left corner of the pool
-            // cols = 1
-            // rows = 2
-            //                1 * 2 + (2 * 2 * 10)
-            int offset = (cols * l.stride) + (rows * l.stride * l.width);
-
-            max = in.data[offset];
-
-
-            for (pool_row = 0; pool_row < l.size; pool_row++)
-            {
-                for (pool_col = 0; pool_col < l.size; pool_col++)
-                {
-                    next = in.data[offset + pool_col + pool_row * l.width];
-                    if (next > max) 
-                    {
-                        max = next;
-                    }
-                }
-            }\
-            // set max in out
-            out.data[cols + rows * out.cols] = max;
-        }
-    }*/
     l.in[0] = in;
     free_matrix(l.out[0]);
     l.out[0] = out;
@@ -176,10 +147,10 @@ void backward_maxpool_layer(layer l, matrix prev_delta)
                     // calculate one value
                     offset = image * in.cols 
                         + channel * l.width * l.height
-                        + rows * l.width
-                        + cols;
+                        + rows * l.width * l.stride
+                        + cols * l.stride;
 
-                    max = in.data[offset];
+                    max = -1000000;
                     max_index = offset;
                     for (pool_row = 0; pool_row < l.size; pool_row++)
                     {
@@ -194,7 +165,7 @@ void backward_maxpool_layer(layer l, matrix prev_delta)
                         }
                     }
                     // fill in corresponding delta w delta from output
-                    prev_delta.data[max_index] += delta.data[out_index];
+                    in.data[max_index] += prev_delta.data[out_index];
                     out_index++;
                 }
             }
