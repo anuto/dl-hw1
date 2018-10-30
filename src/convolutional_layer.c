@@ -52,12 +52,13 @@ matrix im2col(image im, int size, int stride)
     int cur_row;
     int cur_col;
     int channel;
-
+    int size_squared = size * size;
     for(channel = 0; channel < im.c; channel++) {
         image channel_im = get_channel(im, channel);
 
         // go through all the rows
-        for(cur_row = 0; cur_row < size * size; cur_row++) {
+
+        for(cur_row = 0; cur_row < size_squared; cur_row++) {
 
             // go through a single row
             for(cur_col = 0; cur_col < cols; cur_col++) {
@@ -101,13 +102,14 @@ void col2im(matrix col, int size, int stride, image im)
     int cur_row;
     int cur_col;
     int channel;
+    int size_squared = size * size;
 
     // TODO: 5.2 - add values into image im from the column matrix
     for(channel = 0; channel < im.c; channel++) {
         image channel_im = get_channel(im, channel);
 
         // go through all the rows
-        for(cur_row = 0; cur_row < size * size; cur_row++) {
+        for(cur_row = 0; cur_row < size_squared; cur_row++) {
 
             // go through a single row
             for(cur_col = 0; cur_col < cols; cur_col++) {

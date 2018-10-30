@@ -41,29 +41,76 @@ matrix forward_maxpool_layer(layer l, matrix in)
     int pool_row;
     int max;
     int next;
-    for (rows = 0; rows < in.rows / l.stride; rows++) 
+
+    int channel;
+    int image;
+
+    // The images for a batch are stored in the successive rows of the input 
+    // matrix, you should be able to loop over each image, each channel of the 
+    // image, and each application of your filter (similar to your im2col function), 
+    // find max values in some range, and put them into the output.
+    int out_index = 0;
+    int offset;
+    for (image = 0; image < in.rows; image++) 
     {
-        for (cols = 0; cols < in.cols / l.stride; cols++)
+        for (channel = 0; channel < l.channels; channel++) 
+        {
+            for (rows = 0; rows < outh; rows++)
+            {
+                for (cols = 0; cols < outw; cols++)
+                {
+                    // calculate one value
+                    offset = image * in.cols 
+                        + channel * l.width * l.height
+                        + rows * l.width
+                        + cols;
+                    for (pool_row = 0; pool_row < l.size; pool_row++)
+                    {
+                        for (pool_col = 0; pool_col < l.size; pool_col++)
+                        {
+                            next = in.data[offset + pool_col + pool_row * l.width];
+                            if (next > max) 
+                            {
+                                max = next;
+                            }
+                        }
+                    }
+                    out.data[out_index] = max;
+                    out_index++;
+                }
+            }
+        }
+    }
+
+    /*
+    for (rows = 0; rows < out.rows; rows++) 
+    {
+        for (cols = 0; cols < out.cols; cols++)
         {   
             // index of the upper left corner of the pool
-            int offset = (cols * l.stride) + (rows * l.stride * in.cols);
+            // cols = 1
+            // rows = 2
+            //                1 * 2 + (2 * 2 * 10)
+            int offset = (cols * l.stride) + (rows * l.stride * l.width);
 
             max = in.data[offset];
+
+
             for (pool_row = 0; pool_row < l.size; pool_row++)
             {
                 for (pool_col = 0; pool_col < l.size; pool_col++)
                 {
-                    next = in.data[offset + pool_col + pool_row * in.cols];
+                    next = in.data[offset + pool_col + pool_row * l.width];
                     if (next > max) 
                     {
                         max = next;
                     }
                 }
-            }
+            }\
             // set max in out
             out.data[cols + rows * out.cols] = max;
         }
-    }
+    }*/
     l.in[0] = in;
     free_matrix(l.out[0]);
     l.out[0] = out;
@@ -88,8 +135,8 @@ void backward_maxpool_layer(layer l, matrix prev_delta)
     // corresponding delta with the delta from the output. This should be
     // similar to the forward method in structure.
 
-    printf("in %d, %d : delta %d, %d \n", in.rows / l.stride, in.cols / l.stride
-        , delta.rows, delta.cols);
+    // printf("in %d, %d : delta %d, %d \n", in.rows / l.stride, in.cols / l.stride
+    //     , delta.rows, delta.cols);
 
     int cols;
     int rows;
@@ -100,13 +147,52 @@ void backward_maxpool_layer(layer l, matrix prev_delta)
     int max_index;
     // printf("delta.rows: %d\n", delta.rows);
     // printf("delta.columns: %d\n", delta.cols);
-    for (rows = 0; rows < in.rows / l.stride; rows++) 
+    int out_index = 0;
+    int image;
+    int offset;
+    int channel;
+    for (image = 0; image < in.rows; image++) 
     {
-        for (cols = 0; cols < in.cols / l.stride; cols++)
+        for (channel = 0; channel < l.channels; channel++) 
+        {
+            for (rows = 0; rows < outh; rows++)
+            {
+                for (cols = 0; cols < outw; cols++)
+                {
+                    // calculate one value
+                    offset = image * in.cols 
+                        + channel * l.width * l.height
+                        + rows * l.width
+                        + cols;
+
+                    max = in.data[offset];
+                    max_index = offset;
+                    for (pool_row = 0; pool_row < l.size; pool_row++)
+                    {
+                        for (pool_col = 0; pool_col < l.size; pool_col++)
+                        {
+                            next = in.data[offset + pool_col + pool_row * l.width];
+                            if (next > max) 
+                            {
+                                max_index = offset + pool_col + pool_row * l.width;
+                                max = next;
+                            }
+                        }
+                    }
+                    // fill in corresponding delta w delta from output
+                    prev_delta.data[max_index] += delta.data[out_index];
+                    out_index++;
+                }
+            }
+        }
+    }
+    /*for (rows = 0; rows < delta.rows; rows++) 
+    {
+        for (cols = 0; cols < delta.cols; cols++)
         { 
             // printf("cur col: %d\n", cols);
             // index of the upper left corner of the pool
-            int offset = (cols * l.stride) + (rows * l.stride * in.cols);
+            int offset = (cols * l.stride) + (rows * l.stride * l.width);
 
             max = in.data[offset];
             max_index = offset;
@@ -114,19 +200,19 @@ void backward_maxpool_layer(layer l, matrix prev_delta)
             {
                 for (pool_col = 0; pool_col < l.size; pool_col++)
                 {
-                    next = in.data[offset + pool_col + pool_row * in.cols];
+                    next = in.data[offset + pool_col + pool_row * l.width];
                     if (next > max) 
                     {
-                        max_index = offset + pool_col + pool_row * in.cols;
+                        max_index = offset + pool_col + pool_row * l.width;
                         max = next;
                     }
                 }
             }
             // fill in corresponding delta w delta from output
-            prev_delta.data[max_index] = delta.data[cols + rows * delta.cols];
+            prev_delta.data[max_index] += delta.data[cols + rows * delta.cols];
             
         }
-    }
+    }*/
 
 }
 

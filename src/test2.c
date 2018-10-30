@@ -56,10 +56,10 @@ int main(int argc, char * argv[])
 	// 		image width * image height / stride cols
 	matrix result = im2col(im, 3, 1);
 	print_matrix(result);
+
 	image im2 = make_image(5, 5, 3);
     col2im(result, 3, 1, im2);
-
-    printf("now printing image 2 after col2im\n");
+	printf("now printing image 2 after col2im\n");
     print_image(im2);
 
 
