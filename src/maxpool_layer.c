@@ -51,6 +51,7 @@ matrix forward_maxpool_layer(layer l, matrix in)
     // find max values in some range, and put them into the output.
     int out_index = 0;
     int offset;
+    printf("size: %d", l.size);
     for (image = 0; image < in.rows; image++) 
     {
         for (channel = 0; channel < l.channels; channel++) 
@@ -60,10 +61,12 @@ matrix forward_maxpool_layer(layer l, matrix in)
                 for (cols = 0; cols < outw; cols++)
                 {
                     // calculate one value
+
                     offset = image * in.cols 
                         + channel * l.width * l.height
                         + rows * l.width
                         + cols;
+                    printf("    offset: %d", offset);
                     for (pool_row = 0; pool_row < l.size; pool_row++)
                     {
                         for (pool_col = 0; pool_col < l.size; pool_col++)
@@ -81,6 +84,9 @@ matrix forward_maxpool_layer(layer l, matrix in)
             }
         }
     }
+    printf("out_index %d\n", out_index);
+    printf("dimension %d\n", out.rows * out.cols);
+    printf("\n");
 
     /*
     for (rows = 0; rows < out.rows; rows++) 

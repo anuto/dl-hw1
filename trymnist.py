@@ -37,11 +37,11 @@ print
 print("making model...")
 batch = 128
 iters = 5000
-rate = .01
+rate = .1
 momentum = .9
 decay = .0005
 
-m = le_net()
+m = convnet()
 print("training...")
 train_image_classifier(m, train, batch, iters/2, rate, momentum, decay)
 train_image_classifier(m, train, batch, iters/2, rate*.1, momentum, decay)
