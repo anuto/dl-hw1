@@ -8,6 +8,8 @@
 #include "image.h"
 #include "test.h"
 #include "args.h"
+#include "convolutional_layer.h"
+// #include "convolutional_layer.c"
 
 double what_time_is_it_now()
 {
@@ -42,5 +44,17 @@ void run_tests()
 {
     test_matrix_speed();
     //printf("%d tests, %d passed, %d failed\n", tests_total, tests_total-tests_fail, tests_fail);
+}
+
+void test_convolutional_layer() {
+    int im_size = 5;
+    float *data = calloc(im_size * im_size, sizeof(float));
+    for (int i = 0; i < im_size * im_size; i++) {
+        data[i] = i;
+    }
+
+    image im = float_to_image(data, im_size, im_size, 2);
+    matrix temp = im2col(im, 3, 2);
+    print_matrix(temp);
 }
 

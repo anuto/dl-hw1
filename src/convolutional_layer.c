@@ -46,43 +46,59 @@ matrix im2col(image im, int size, int stride)
     int outh = (im.h-1)/stride + 1;
     int rows = im.c*size*size;
     int cols = outw * outh;
-    matrix col = make_matrix(rows, cols);
+    matrix output = make_matrix(rows, cols);
 
     // TODO: 5.1 - fill in the column matrix
     int cur_row;
     int cur_col;
     int channel;
     int size_squared = size * size;
+    int filter_col;
+    int filter_row;
+    int current_out_index = 0;
+
+    // for every channel in the image
     for(channel = 0; channel < im.c; channel++) {
         image channel_im = get_channel(im, channel);
 
-        // go through all the rows
+        // for each square in the filter (starting at top left, => bottom right)
+        for(filter_row = -size / 2; filter_row < size / 2; filter_row++) {
+            
+            for(filter_col = - size / 2; filter_col < size / 2; filter_col++) {
+                
+                // go through all the rows
+                // iterations = OUTH but this makes indexing original img simpler
+                for(cur_row = 0; cur_row < im.w; cur_row += stride) {
 
-        for(cur_row = 0; cur_row < size_squared; cur_row++) {
+                    // go through a single row
+                    // iterations = OUTH but this makes indexing original img simpler
+                    for(cur_col = 0; cur_col < im.h; cur_col += stride) {
+                        // find center
+                        // center is at row_col, cur_col
 
-            // go through a single row
-            for(cur_col = 0; cur_col < cols; cur_col++) {
-                // cur_row represents index in the size x size kernel
-                // cur_col represents the filter #, starting at 0
-                // cur_col can be used to calculate the top left corner of the kernel
-                // cur_row can be used to calculate the index from top left corner of kernel
-                int im_col = cur_col % im.w - 1;
-                int im_row = cur_col / im.w - 1;
+                        // find square of filter_index relstive to center
+                        // 3x3: pos from center
+                        int adjusted_col = cur_col + filter_col;
+                        int adjusted_row = cur_row + filter_row;
 
-                im_col += cur_row % size;
-                im_row += cur_row / size;
+                        // float get_pixel(image im, int x, int y, int c)
+                        // will handle the 0 case automatically #padding :)
+                        if(adjusted_row < 0 || adjusted_col < 0 || adjusted_row >= im.h || adjusted_col >= im.w) {
+                            output.data[current_out_index] = 0;
 
-                int col_array_index = cur_row * cols + cur_col + (size * size * channel * cols);
-                if (im_col == -1 || im_row == -1 || im_col == im.w || im_row == im.h) {
-                    col.data[col_array_index] = 0;        
-                } else {
-                    col.data[col_array_index] = channel_im.data[im_row * im.w + im_col];
-                    // = get_pixel(im, im_col, im_row, channel)
+                        } else {
+                            output.data[current_out_index] = get_pixel(im, adjusted_col,adjusted_row, channel);
+
+                        }
+                        current_out_index++;
+                    }
                 }
             }
         }
+
     }
-    return col;
+    // printf("did we make it boiz???\n");
+    return output;
 }
 
 
@@ -104,30 +120,43 @@ void col2im(matrix col, int size, int stride, image im)
     int channel;
     int size_squared = size * size;
 
+    int filter_col;
+    int filter_row = 0;
+    int current_out_index = 0;
+
     // TODO: 5.2 - add values into image im from the column matrix
     for(channel = 0; channel < im.c; channel++) {
         image channel_im = get_channel(im, channel);
+        // for each square in the filter (starting at top left, => bottom right)
+        for(filter_row = -size / 2; filter_row < size / 2; filter_row++) {
+        
+            for(filter_col = - size / 2; filter_col < size / 2; filter_col++) {
+            
+                // go through all the rows
+                // iterations = OUTH but this makes indexing original img simpler
+                for(cur_row = 0; cur_row < im.w; cur_row += stride) {
 
-        // go through all the rows
-        for(cur_row = 0; cur_row < size_squared; cur_row++) {
+                    // go through a single row
+                    // iterations = OUTH but this makes indexing original img simpler
+                    for(cur_col = 0; cur_col < im.h; cur_col += stride) {
+                        // find center
+                        // center is at row_col, cur_col
 
-            // go through a single row
-            for(cur_col = 0; cur_col < cols; cur_col++) {
-                // cur_row represents index in the size x size kernel
-                // cur_col represents the filter #, starting at 0
-                // cur_col can be used to calculate the top left corner of the kernel
-                // cur_row can be used to calculate the index from top left corner of kernel
-                int im_col = cur_col % im.w - 1;
-                int im_row = cur_col / im.w - 1;
+                        // find square of filter_index relstive to center
+                        // 3x3: pos from center
+                        int adjusted_col = cur_col + filter_col;
+                        int adjusted_row = cur_row + filter_row;
 
-                im_col += cur_row % size;
-                im_row += cur_row / size;
-
-                int col_array_index = cur_row * cols + cur_col + (size * size * channel * cols);
-                if (im_col != -1 && im_row != -1 && im_col != im.w && im_row != im.h) {
-                    set_pixel(im, im_col, im_row, channel, get_pixel(im, im_col, im_row, channel) 
-                        + col.data[col_array_index]); 
-                    // channel_im.data[im_row * im.w + im_col] += col.data[col_array_index];
+                        // float get_pixel(image im, int x, int y, int c)
+                        // will handle the 0 case automatically #padding :)
+                        
+                        // void set_pixel(image im, int x, int y, int c, float v)
+                        float val = col.data[current_out_index];
+                        current_out_index++;
+                        if(adjusted_row >= 0 || adjusted_col >= 0 || adjusted_row < im.h || adjusted_col < im.w) {
+                            set_pixel(im, adjusted_col, adjusted_row, channel, val);
+                        }
+                    }
                 }
             }
         }

@@ -36,11 +36,11 @@ print("done")
 print
 
 print("making model...")
-batch = 128
-iters = 5000
-rate = .01
-momentum = .9
-decay = .005
+batch = 140
+iters = 50000
+rate = .001
+momentum = .8
+decay = .0
 
 m = conv_net()
 print("training...")
