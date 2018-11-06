@@ -37,9 +37,9 @@ print
 
 print("making model...")
 batch = 140
-iters = 15000
+iters = 2000
 rate = .01
-momentum = .8
+momentum = .95
 decay = .005
 
 m = conv_net()
