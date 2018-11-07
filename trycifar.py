@@ -12,7 +12,12 @@ def neural_net():
 def conv_net():
     # How many operations are needed for a forard pass through this network?
     # Your answer: 
-    l = [   make_convolutional_layer(32, 32, 3, 8, 3, 1, LRELU),
+    # number of in rows (# of images)
+    # * # ops in im2col
+    # * (l.w, x <- dimensions + wx.rows * wx.cols)
+
+    l = [ 
+            make_convolutional_layer(32, 32, 3, 8, 3, 1, LRELU),
             make_maxpool_layer(32, 32, 8, 3, 2),
             make_convolutional_layer(16, 16, 8, 16, 3, 1, LRELU),
             make_maxpool_layer(16, 16, 16, 3, 2),
@@ -26,7 +31,11 @@ def conv_net():
 def your_net():
     # Define your network architecture here. It should have 5 layers. How many operations does it need for a forward pass?
     # It doesn't have to be exactly the same as conv_net but it should be close.
-    l = [   make_connected_layer(3072, 10, SOFTMAX)]
+    l =[ 
+            make_connected_layer(3072, 1500, LRELU),
+            make_connected_layer(1500, 500, LRELU),
+            make_connected_layer(500, 256, LRELU),
+            make_connected_layer(256, 10, SOFTMAX)]
     return make_net(l)
 
 print("loading data...")
@@ -36,13 +45,14 @@ print("done")
 print
 
 print("making model...")
+
+iters = 7500
 batch = 140
-iters = 2000
 rate = .01
 momentum = .95
 decay = .005
 
-m = conv_net()
+m = your_net()
 print("training...")
 train_image_classifier(m, train, batch, iters, rate, momentum, decay)
 print("done")
@@ -55,5 +65,5 @@ print("test accuracy:     %f", accuracy_net(m, test))
 # How accurate is the fully connected network vs the convnet when they use similar number of operations?
 # Why are you seeing these results? Speculate based on the information you've gathered and what you know about DL and ML.
 # Your answer:
-#
+# Training for the same amount of time (2000 iterations) for the fully connected
 
